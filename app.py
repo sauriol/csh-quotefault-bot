@@ -1,7 +1,9 @@
 #!flask/bin/python
-from flask import Flask, request, abort
+from flask import Flask, request, abort, jsonify
+import json
 import os
 import responses
+import requests
 
 app = Flask(__name__)
 
@@ -31,6 +33,12 @@ def get_quote():
             return responses.help_msg('')
         elif(command in singles + multiples):
             return responses.respond(request.form['text'])
+        elif(command == 'dev'):
+            r = request.form.to_dict()
+            r['text'] = r['text'].replace('dev', '', 1).strip()
+            res = requests.post('https://quotefault-bot-dev.csh.rit.edu/quote', data=r)
+            expanded = bytes(res.text, "utf-8").decode("unicode_escape") # expand escape codes
+            return expanded
         else:
             return responses.help_msg(command)
     else:
